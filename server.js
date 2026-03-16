@@ -20,6 +20,7 @@ const server = http.createServer((req, res) => {
   req.on('end', () => {
     let targetPath = req.url;
     if (targetPath === '/v1/accesstoken') targetPath = '/accesstoken';
+    if (targetPath === '/accesstoken') targetPath = '/token';
 
     console.log('---> Request:', req.method, targetPath);
     console.log('---> Body:', body);
