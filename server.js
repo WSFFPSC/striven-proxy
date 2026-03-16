@@ -2,7 +2,7 @@ const https = require('https');
 const http = require('http');
 
 const PORT = process.env.PORT || 3000;
-const STRIVEN_API = 'api.striven.com';
+const STRIVEN_HOST = 'wsfsc.striven.com';
 
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -22,7 +22,7 @@ const server = http.createServer((req, res) => {
     if (targetPath === '/v1/accesstoken') targetPath = '/accesstoken';
 
     const forwardHeaders = {
-      'host': STRIVEN_API,
+      'host': STRIVEN_HOST,
       'content-type': req.headers['content-type'] || 'application/x-www-form-urlencoded',
       'accept': 'application/json',
     };
@@ -36,7 +36,7 @@ const server = http.createServer((req, res) => {
     }
 
     const options = {
-      hostname: STRIVEN_API,
+      hostname: STRIVEN_HOST,
       path: targetPath,
       method: req.method,
       headers: forwardHeaders,
