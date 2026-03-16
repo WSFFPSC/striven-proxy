@@ -18,9 +18,13 @@ const server = http.createServer((req, res) => {
   let body = '';
   req.on('data', chunk => body += chunk);
   req.on('end', () => {
+    // Strip leading /v1 from accesstoken path
+    let targetPath = req.url;
+    if (targetPath === '/v1/accesstoken') targetPath = '/accesstoken';
+
     const options = {
       hostname: STRIVEN_API,
-      path: req.url,
+      path: targetPath,
       method: req.method,
       headers: { ...req.headers, host: STRIVEN_API },
     };
