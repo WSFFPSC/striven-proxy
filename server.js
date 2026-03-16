@@ -18,25 +18,40 @@ const server = http.createServer((req, res) => {
   let body = '';
   req.on('data', chunk => body += chunk);
   req.on('end', () => {
-    // Strip leading /v1 from accesstoken path
     let targetPath = req.url;
     if (targetPath === '/v1/accesstoken') targetPath = '/accesstoken';
+
+    const forwardHeaders = {
+      'host': STRIVEN_API,
+      'content-type': req.headers['content-type'] || 'application/x-www-form-urlencoded',
+      'accept': 'application/json',
+    };
+
+    if (req.headers['authorization']) {
+      forwardHeaders['authorization'] = req.headers['authorization'];
+    }
+
+    if (body) {
+      forwardHeaders['content-length'] = Buffer.byteLength(body).toString();
+    }
 
     const options = {
       hostname: STRIVEN_API,
       path: targetPath,
       method: req.method,
-      headers: { ...req.headers, host: STRIVEN_API },
+      headers: forwardHeaders,
     };
 
     const proxy = https.request(options, (proxyRes) => {
-      res.writeHead(proxyRes.statusCode, proxyRes.headers);
+      res.writeHead(proxyRes.statusCode, {
+        'content-type': proxyRes.headers['content-type'] || 'application/json',
+      });
       proxyRes.pipe(res, { end: true });
     });
 
     proxy.on('error', (err) => {
       res.writeHead(502);
-      res.end('Proxy error: ' + err.message);
+      res.end(JSON.stringify({ error: err.message }));
     });
 
     if (body) proxy.write(body);
